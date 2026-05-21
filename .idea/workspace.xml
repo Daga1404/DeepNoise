@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="280f4144-08f5-4ffc-a5a1-afad086f1131" name="Changes" comment="initial commit / remote definition">
-      <change afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DESIGN.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="280f4144-08f5-4ffc-a5a1-afad086f1131" name="Changes" comment="initial commit / remote definition" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -70,7 +66,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1779326148758</updated>
-      <workItem from="1779326149879" duration="568000" />
+      <workItem from="1779326149879" duration="903000" />
     </task>
     <task id="LOCAL-00001" summary="initial commit / remote definition">
       <option name="closed" value="true" />

@@ -14,6 +14,31 @@ This is a university ML project (two-part deliverable): **Part 1 = planning** (d
 
 ---
 
+## Multi-Agent Workflow
+
+This project uses a three-agent system. Each agent has its own instruction file under `agents/`.
+
+| Agent | File | Invoked when |
+|---|---|---|
+| **Planner** | `agents/planner.md` | Starting a new task, decomposing work, resolving blockers |
+| **Coder** | `agents/coder.md` | Implementing any file in `src/`, `tests/`, or `notebooks/` |
+| **Reviewer** | `agents/reviewer.md` | A module is complete and ready for quality check |
+
+**Standard loop:**
+```
+Planner → issues task card
+    ↓
+Coder → implements, outputs file list + notes
+    ↓
+Reviewer → audits, returns PASS or FAIL with findings
+    ↓
+Planner → marks done or re-queues with findings attached
+```
+
+Always load the relevant agent file before starting that role's work.
+
+---
+
 ## Classes
 
 | ID | Label | Description |
@@ -48,24 +73,28 @@ pip install -r requirements.txt
 
 ```
 acoustic-classifier/
-├── CLAUDE.md               ← YOU ARE HERE
-├── DESIGN.md               ← Full technical design document
+├── CLAUDE.md                   ← YOU ARE HERE
+├── DESIGN.md                   ← Full technical design document
+├── agents/
+│   ├── planner.md              ← Planner agent instructions
+│   ├── coder.md                ← Coder agent instructions
+│   └── reviewer.md             ← Reviewer agent instructions
 ├── data/
-│   ├── raw/                ← Original audio files, organized by class subfolder
-│   ├── processed/          ← Resampled 22050Hz mono WAVs
-│   └── spectrograms/       ← Precomputed .npy spectrogram arrays + labels.csv
+│   ├── raw/                    ← Original audio files, organized by class subfolder
+│   ├── processed/              ← Resampled 22050Hz mono WAVs
+│   └── spectrograms/           ← Precomputed .npy spectrogram arrays + labels.csv
 ├── notebooks/
-│   ├── 01_eda.ipynb        ← Exploratory analysis, waveform/spectrogram plots
+│   ├── 01_eda.ipynb
 │   ├── 02_feature_extraction.ipynb
 │   └── 03_baseline.ipynb
 ├── src/
-│   ├── preprocess.py       ← load_audio(), resample(), normalize(), segment()
-│   ├── features.py         ← compute_melspectrogram(), save_spectrograms()
-│   ├── dataset.py          ← AcousticDataset class, tf.data pipeline, splits
-│   ├── baseline.py         ← train_svm_baseline(), evaluate_baseline()
-│   ├── model.py            ← build_cnn() returns compiled keras.Model
-│   ├── train.py            ← CLI entry point: python src/train.py --config ...
-│   └── evaluate.py         ← confusion matrix, F1, error analysis, plots
+│   ├── preprocess.py           ← load_audio(), resample(), normalize(), segment()
+│   ├── features.py             ← compute_melspectrogram(), save_spectrograms()
+│   ├── dataset.py              ← AcousticDataset class, tf.data pipeline, splits
+│   ├── baseline.py             ← train_svm_baseline(), evaluate_baseline()
+│   ├── model.py                ← build_cnn() returns compiled keras.Model
+│   ├── train.py                ← CLI entry point: python src/train.py --config ...
+│   └── evaluate.py             ← confusion matrix, F1, error analysis, plots
 └── tests/
     └── test_preprocess.py
 ```
@@ -114,7 +143,6 @@ Expected accuracy: ~60–75%. The CNN should beat this.
 
 ## Data Directory Convention
 
-Place raw audio files like this:
 ```
 data/raw/
     normal_operation/   *.wav
@@ -124,22 +152,13 @@ data/raw/
     silence_ambient/    *.wav
 ```
 
-`preprocess.py` will walk this tree and build `data/processed/` with the same structure.
-
-`features.py` will produce:
-```
-data/spectrograms/
-    normal_operation/   *.npy
-    metallic_impact/    *.npy
-    ...
-    labels.csv          (path, class_label, class_id)
-```
+`preprocess.py` walks this tree → `data/processed/` (same structure).  
+`features.py` produces `data/spectrograms/` + `labels.csv`.
 
 ---
 
 ## Evaluation Checklist
 
-When evaluating a trained model, always produce:
 - [ ] Accuracy on test set
 - [ ] Macro F1-score on test set
 - [ ] Per-class precision, recall, F1
@@ -151,13 +170,13 @@ When evaluating a trained model, always produce:
 
 ## Implementation Order (Part 2)
 
-1. `src/preprocess.py` — audio loading and normalization
-2. `src/features.py` — spectrogram computation and saving
-3. `src/dataset.py` — tf.data dataset and splits
-4. `src/baseline.py` — SVM baseline, report metrics
-5. `src/model.py` — CNN definition
-6. `src/train.py` — training loop with callbacks
-7. `src/evaluate.py` — full evaluation suite
+1. `src/preprocess.py`
+2. `src/features.py`
+3. `src/dataset.py`
+4. `src/baseline.py`
+5. `src/model.py`
+6. `src/train.py`
+7. `src/evaluate.py`
 8. Notebooks for EDA and result visualization
 
 ---
@@ -168,18 +187,15 @@ When evaluating a trained model, always produce:
 pytest tests/ -v
 ```
 
-Each pipeline stage should have at least one unit test covering:
-- Correct output shape
-- No NaN values in spectrogram output
-- Split sizes match requested ratios
+Each pipeline stage needs at least one unit test: correct output shape, no NaNs, split ratios.
 
 ---
 
 ## Notes for Claude Code
 
-- **Never commit raw audio files** — keep them in `data/` which is gitignored
+- **Never commit raw audio files** — `data/` is gitignored
 - Prefer `pathlib.Path` over `os.path` throughout
-- All scripts should accept a `--data-dir` argument so paths are not hardcoded
-- When adding dependencies, update `requirements.txt` immediately
-- Keep functions small and testable — avoid monolithic scripts
-- If a TensorFlow version conflict appears, check `python -c "import tensorflow as tf; print(tf.__version__)"` before debugging further
+- All scripts accept `--data-dir` so paths are never hardcoded
+- Update `requirements.txt` when adding dependencies
+- Keep functions small and testable
+- Check `python -c "import tensorflow as tf; print(tf.__version__)"` before debugging TF version issues
