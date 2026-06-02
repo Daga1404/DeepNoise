@@ -25,12 +25,12 @@ env/
 .vscode/
 *.swp
 
-# Models and outputs
-models/
+# Models and outputs — ignore weights/arrays, but track dirs and history
 outputs/
 *.h5
 *.keras
 *.pkl
+*.npy
 
 # OS
 .DS_Store

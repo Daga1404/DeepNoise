@@ -1,13 +1,33 @@
 """CNN architecture for acoustic event classification."""
 
-import tensorflow as tf
 from tensorflow import keras
 
-SPEC_SHAPE = (128, 173, 1)
-NUM_CLASSES = 5
+from src.config import INPUT_SHAPE, NUM_CLASSES
 
 
-def build_cnn(input_shape: tuple = SPEC_SHAPE, num_classes: int = NUM_CLASSES) -> keras.Model:
+def build_cnn(
+    input_shape: tuple = INPUT_SHAPE,
+    num_classes: int = NUM_CLASSES,
+    dropout_rate: float = 0.4,
+) -> keras.Model:
+    """
+    Build and compile the acoustic event classification CNN.
+
+    Architecture (from DESIGN.md §CNN Architecture):
+        Input → Conv2D(32)+BN+ReLU+MaxPool → Conv2D(64)+BN+ReLU+MaxPool
+               → Conv2D(128)+BN+ReLU → GlobalAvgPool
+               → Dense(128)+ReLU+Dropout → Dense(num_classes)+Softmax
+
+    Compiled with Adam(lr=1e-3) and categorical_crossentropy loss.
+
+    Args:
+        input_shape: Spectrogram tensor shape ``(n_mels, time_frames, channels)``.
+        num_classes: Number of output classes.
+        dropout_rate: Dropout probability applied before the final Dense layer.
+
+    Returns:
+        Compiled ``keras.Model``.
+    """
     inputs = keras.Input(shape=input_shape)
 
     x = keras.layers.Conv2D(32, (3, 3), padding="same")(inputs)
@@ -27,7 +47,7 @@ def build_cnn(input_shape: tuple = SPEC_SHAPE, num_classes: int = NUM_CLASSES) -
     x = keras.layers.GlobalAveragePooling2D()(x)
 
     x = keras.layers.Dense(128, activation="relu")(x)
-    x = keras.layers.Dropout(0.4)(x)
+    x = keras.layers.Dropout(dropout_rate)(x)
 
     outputs = keras.layers.Dense(num_classes, activation="softmax")(x)
 
