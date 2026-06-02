@@ -8,6 +8,7 @@ Usage:
 
 import argparse
 import json
+import logging
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -23,6 +24,8 @@ from sklearn.metrics import (
 
 from src.config import CLASS_LABELS, NUM_CLASSES
 from src.dataset import load_labels, make_tf_dataset, split_dataset
+
+_log = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -80,9 +83,9 @@ def evaluate_cnn(model_path: Path, data_dir: Path, output_dir: Path) -> dict:
     report = classification_report(y_true, y_pred, target_names=class_names)
 
     # Macro F1 first — it is the primary metric.
-    print(f"Macro F1 : {macro_f1:.4f}")
-    print(f"Accuracy : {accuracy:.4f}")
-    print(report)
+    _log.info(f"Macro F1 : {macro_f1:.4f}")
+    _log.info(f"Accuracy : {accuracy:.4f}")
+    _log.info(report)
 
     _save_report(accuracy, macro_f1, report, output_dir / "cnn_report.txt")
     _save_confusion_matrix(y_true, y_pred, class_names, output_dir / "cnn_confusion.png")
@@ -263,6 +266,7 @@ def _save_augmentation_comparison(models_root: Path, out_path: Path) -> None:
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(
         description="Evaluate a trained acoustic CNN on the held-out test set."
     )

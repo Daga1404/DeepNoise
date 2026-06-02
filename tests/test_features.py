@@ -183,5 +183,5 @@ def test_save_spectrograms_augmented_count(tmp_path):
     originals = df[~df["is_augmented"]]
     augmented = df[df["is_augmented"]]
     assert len(originals) == n_files
-    # Each file produces 2 audio augs + 1 specaug = 3 augmented copies.
-    assert len(augmented) == n_files * 3
+    # Each file produces 3 audio augs (noise, +shift, -shift) + 1 specaug = 4 augmented copies.
+    assert len(augmented) == n_files * 4

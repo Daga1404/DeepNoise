@@ -44,8 +44,9 @@ def train_svm(X_train: np.ndarray, y_train: np.ndarray) -> Pipeline:
     """
     Fit a StandardScaler → SVC(kernel='rbf', C=10) pipeline.
 
-    The pipeline is returned so that ``evaluate`` can call ``.predict``
-    directly on raw (unscaled) feature vectors.
+    A ``Pipeline`` is returned rather than a bare ``SVC`` so that the scaler
+    is applied automatically on every ``predict`` call — callers always pass
+    raw (unscaled) feature vectors and never need to manage scaling separately.
 
     Args:
         X_train: Float32 array of shape ``(n_samples, n_features)``.

@@ -8,6 +8,7 @@ Two runs are required for the augmentation experiment:
 
 import argparse
 import json
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -15,6 +16,8 @@ from sklearn.utils.class_weight import compute_class_weight
 
 from src.config import NUM_CLASSES
 from src.dataset import load_labels, make_tf_dataset, split_dataset
+
+_log = logging.getLogger(__name__)
 
 
 def _str_to_bool(value: str) -> bool:
@@ -84,7 +87,7 @@ def run_training(
 
     train_df, val_df, _test_df = split_dataset(df)
 
-    print(
+    _log.info(
         f"Split — train: {len(train_df)}  val: {len(val_df)}  "
         f"test: {len(_test_df)}  (augment={augment})"
     )
@@ -94,7 +97,7 @@ def run_training(
 
     # --- Class weights ----------------------------------------------------------
     class_weight = _compute_class_weights(train_df)
-    print(f"Class weights: {class_weight}")
+    _log.info(f"Class weights: {class_weight}")
 
     # --- Model ------------------------------------------------------------------
     model = build_cnn()
@@ -133,12 +136,13 @@ def run_training(
     )
 
     _save_history(history, output_dir)
-    print(f"\nArtefacts written to {output_dir}")
-    print(f"  cnn_best.keras")
-    print(f"  history.json  (keys: {list(history.history.keys())})")
+    _log.info(f"\nArtefacts written to {output_dir}")
+    _log.info(f"  cnn_best.keras")
+    _log.info(f"  history.json  (keys: {list(history.history.keys())})")
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     parser = argparse.ArgumentParser(
         description="Train the acoustic event CNN (one run of the augmentation experiment)."
     )

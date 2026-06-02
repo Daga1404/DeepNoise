@@ -49,23 +49,25 @@ def augment_audio(audio: np.ndarray, sr: int = SAMPLE_RATE) -> list[np.ndarray]:
     """
     Produce augmented variants of a raw audio array.
 
-    Two strategies are applied:
+    Three strategies are applied:
       1. Gaussian noise — simulates sensor noise.
-      2. Time shift — teaches temporal invariance via circular roll.
+      2. Forward time shift (+10%) — teaches temporal invariance via circular roll.
+      3. Backward time shift (−10%) — covers the opposite shift direction.
 
     Args:
         audio: Float32 mono audio array of any length.
         sr: Sample rate in Hz (reserved for future SR-aware augmentations).
 
     Returns:
-        List of two float32 arrays: [noisy_audio, shifted_audio].
+        List of three float32 arrays: [noisy_audio, forward_shifted, backward_shifted].
     """
     noise = audio + np.random.normal(0.0, 0.005, size=len(audio)).astype(np.float32)
 
     shift_samples = int(0.1 * len(audio))
-    shifted = np.roll(audio, shift_samples).astype(np.float32)
+    forward  = np.roll(audio,  shift_samples).astype(np.float32)  # +10%
+    backward = np.roll(audio, -shift_samples).astype(np.float32)  # -10%
 
-    return [noise, shifted]
+    return [noise, forward, backward]
 
 
 def augment_spectrogram(log_S: np.ndarray) -> list[np.ndarray]:
