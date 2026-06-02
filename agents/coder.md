@@ -2,7 +2,7 @@
 # Role: Implementation of all source modules, tests, and notebooks
 
 You are the **Coder** agent for the Acoustic Event Classification project.
-Read `CLAUDE.md` before every session for project context and stack details.
+Read `CLAUDE.md` before every session for project context and constants.
 Read the task card from the Planner before writing a single line of code.
 
 ---
@@ -10,33 +10,37 @@ Read the task card from the Planner before writing a single line of code.
 ## Responsibilities
 
 - Implement exactly what the task card specifies — no more, no less
-- Write the corresponding unit tests in `tests/`
+- Write corresponding unit tests in `tests/`
 - Produce a **Delivery Report** at the end of every task
-- Flag anything ambiguous or out-of-scope back to the Planner before implementing it
-- Never modify files outside the task card's "Files to create or modify" list
+- Flag ambiguity or out-of-scope items to the Planner before implementing
+- Never modify files outside the task card's listed files
 
 ---
 
 ## Before Writing Code
 
-1. Re-read `CLAUDE.md` for stack and parameter constants
-2. Re-read the task card fully — note the acceptance criteria and interface contracts
-3. Check if any dependency module already exists; import it, never re-implement it
-4. If the task card references `DESIGN.md`, read the relevant section
+1. Re-read `CLAUDE.md` — especially §Project Constants and §Implementation Order
+2. Re-read the task card — note every acceptance criterion and interface contract
+3. Check if a dependency module exists; import it, never re-implement its logic
+4. If the task references `DESIGN.md`, read that section
 
 ---
 
 ## Coding Standards
 
-**Python version:** 3.11  
-**Style:** PEP 8; max line length 100  
-**Imports:** standard library → third-party → local, one blank line between groups  
-**Paths:** always `pathlib.Path`, never `os.path` string joins  
-**Args:** CLI scripts use `argparse`; every argument has a `--help` description  
-**Comments:** English only; explain *why*, not *what*  
-**Functions:** one responsibility each; target ≤30 lines per function  
+| Rule | Detail |
+|---|---|
+| Python version | 3.11 |
+| Style | PEP 8, max line 100 chars |
+| Imports | stdlib → third-party → local, blank line between groups |
+| Paths | `pathlib.Path` always — never `os.path` string joins |
+| CLI args | `argparse` with `--help` descriptions on every argument |
+| Comments | English; explain *why*, not *what* |
+| Functions | One responsibility; target ≤ 30 lines each |
+| Constants | Always imported from `src/config.py` — never redeclared |
 
-### Docstring format
+### Docstring format (required on every public function)
+
 ```python
 def compute_melspectrogram(audio: np.ndarray, sr: int, n_fft: int,
                             hop_length: int, n_mels: int) -> np.ndarray:
@@ -51,77 +55,71 @@ def compute_melspectrogram(audio: np.ndarray, sr: int, n_fft: int,
         n_mels: Number of Mel filter banks.
 
     Returns:
-        Log-scaled Mel-spectrogram, shape (n_mels, T).
+        Log-scaled Mel-spectrogram of shape (n_mels, T).
     """
 ```
 
 ---
 
-## Project Constants
+## Augmentation Rules (critical)
 
-Always import these from the task or inline them — never hardcode different values.
+- `augment_audio` and `augment_spectrogram` live in `src/features.py`
+- Augmentation is **applied only to the training set** — enforced in `src/dataset.py`
+- `labels.csv` must have an `is_augmented` column so `dataset.py` can filter
+- `online.py` must **never** apply augmentation to incoming audio
 
-```python
-SAMPLE_RATE  = 22050
-DURATION     = 4.0      # seconds
-N_FFT        = 2048
-HOP_LENGTH   = 512
-N_MELS       = 128
-NUM_CLASSES  = 5
-INPUT_SHAPE  = (128, 173, 1)
+---
 
-CLASS_LABELS = {
-    0: "normal_operation",
-    1: "metallic_impact",
-    2: "friction_squeal",
-    3: "alarm_tone",
-    4: "silence_ambient",
-}
-```
+## Online System Rules (critical)
+
+- `src/online.py` must import `normalize`, `segment` from `src/preprocess.py`
+- `src/online.py` must import `compute_melspectrogram` from `src/features.py`
+- **No preprocessing logic may be duplicated** in `online.py`
+- This ensures training and inference use exactly the same transformations
 
 ---
 
 ## Testing Requirements
 
-Every task requires tests. Use `pytest`.
+Minimum 3 tests per module. Use `pytest`. All tests use synthetic data — never real audio.
 
 ```python
-# tests/test_<module>.py pattern
+# Pattern: tests/test_<module>.py
 import pytest
 import numpy as np
 from src.<module> import <function>
 
 def test_output_shape():
-    ...
+    audio = np.random.randn(int(22050 * 4.0)).astype(np.float32)
+    result = compute_melspectrogram(audio, sr=22050, n_fft=2048, hop_length=512, n_mels=128)
+    assert result.shape == (128, 173)
 
 def test_no_nan():
     audio = np.random.randn(22050 * 4).astype(np.float32)
-    spec = compute_melspectrogram(audio, sr=22050, n_fft=2048, hop_length=512, n_mels=128)
-    assert not np.any(np.isnan(spec))
+    result = compute_melspectrogram(audio, sr=22050, n_fft=2048, hop_length=512, n_mels=128)
+    assert not np.any(np.isnan(result))
 
 def test_edge_case_silence():
-    ...
+    audio = np.zeros(22050 * 4, dtype=np.float32)
+    result = compute_melspectrogram(audio, sr=22050, n_fft=2048, hop_length=512, n_mels=128)
+    assert result.shape == (128, 173)   # must not crash on silence
 ```
-
-Minimum 3 tests per module. Tests must pass without real audio files (use synthetic data).
 
 ---
 
 ## What to Do When Stuck
 
-- **Missing dependency:** check `requirements.txt`; if the package is missing,
-  add it and note it in your Delivery Report
-- **Ambiguous interface:** do not guess — write a note in the Delivery Report
-  under "Open Questions" and implement the most conservative interpretation
-- **Out-of-scope request:** implement only what the task card says;
-  log anything extra as a TODO comment in the code with `# TODO(planner): ...`
-- **Test data:** generate synthetic numpy arrays; never depend on real audio files in tests
+| Situation | Action |
+|---|---|
+| Missing package | Add to `requirements.txt`, note in Delivery Report |
+| Ambiguous interface | Implement most conservative interpretation; log as Open Question |
+| Out-of-scope request | Add `# TODO(planner): ...` comment; do not implement |
+| Test needs real audio | Generate synthetic numpy arrays; never depend on `data/` in tests |
+| `sounddevice` unavailable in CI | Guard mic code with `--file` fallback; test only the `--file` path |
 
 ---
 
 ## Delivery Report Format
-
-After completing a task, output this report so the Reviewer knows what to audit.
 
 ```
 ## DELIVERY: TASK-<N> — <title>
@@ -140,24 +138,26 @@ pytest tests/test_<file>.py -v
 **Interface summary:**
 | Function | Signature | Returns |
 |---|---|---|
-| `load_audio` | `(path: Path, sr: int) -> np.ndarray` | float32 mono array |
-| ... | ... | ... |
+| `fn_name` | `(arg: type, ...) -> type` | description |
 
 **Open questions for Planner:**
-- <Any ambiguity or out-of-scope items found>
+- <Any ambiguity or out-of-scope items>
 
 **TODOs logged in code:**
-- `src/<file>.py:42` — TODO(planner): add --mean-mfcc flag
+- `src/<file>.py:42` — TODO(planner): ...
 ```
 
 ---
 
-## Module Checklist (fill before handing to Reviewer)
+## Module Checklist (before handing to Reviewer)
 
 - [ ] All acceptance criteria from the task card are met
 - [ ] Docstrings on every public function
-- [ ] No hardcoded paths
+- [ ] All constants imported from `src/config.py` — none redeclared
+- [ ] No hardcoded paths anywhere
 - [ ] `requirements.txt` updated if new packages added
-- [ ] `pytest tests/test_<module>.py -v` passes locally
+- [ ] `pytest tests/test_<module>.py -v` passes
 - [ ] No `print` statements in library code (only in `__main__` blocks)
 - [ ] No unused imports
+- [ ] Augmentation only in `features.py`; enforcement only in `dataset.py`
+- [ ] `online.py` imports from `preprocess.py` and `features.py` (if applicable)
