@@ -5,19 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="280f4144-08f5-4ffc-a5a1-afad086f1131" name="Changes" comment="initial commit / remote definition">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/agents/approver.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/01_eda.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/01_eda.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/02_feature_extraction.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/02_feature_extraction.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/03_baseline.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/03_baseline.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/baseline.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/baseline.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/evaluate.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/features.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/preprocess.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_preprocess.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -22,14 +22,27 @@ representations. University ML project — Part 1 (planning) is done; Part 2 is 
 | **Planner** | `agents/planner.md` | Starting a new task, decomposing work, resolving blockers |
 | **Coder** | `agents/coder.md` | Implementing any file in `src/`, `tests/`, or `notebooks/` |
 | **Reviewer** | `agents/reviewer.md` | A module is complete and ready for quality check |
+| **Approver** | `agents/approver.md` | Full codebase audit before any training run or live demo |
 
-**Standard loop:**
+**Standard loop (per task):**
 ```
 Planner  →  issues task card
 Coder    →  implements, outputs Delivery Report
-Reviewer →  audits, returns PASS or FAIL
+Reviewer →  audits single module, returns PASS or FAIL
 Planner  →  marks DONE or re-queues with findings
 ```
+
+**Approver invocation (adversarial, cross-module):**
+```
+Planner  →  invokes Approver when all tasks are DONE, or before a training run
+Approver →  audits entire codebase: bugs, crash paths, silent failures, demo risks
+            returns APPROVED / CONDITIONALLY APPROVED / REJECTED
+Planner  →  routes Critical findings to Coder before any pipeline execution
+```
+
+The Reviewer checks one module for spec compliance.
+The Approver hunts failure modes across the entire codebase — including things the Reviewer
+is not looking for: numerical edge cases, cross-module inconsistencies, and demo-day landmines.
 
 Always load the relevant agent file before starting that role's work.
 
@@ -101,7 +114,8 @@ acoustic-classifier/
 ├── agents/
 │   ├── planner.md
 │   ├── coder.md
-│   └── reviewer.md
+│   ├── reviewer.md
+│   └── approver.md
 ├── data/
 │   ├── raw/                    ← Human places audio here (see MANUAL_TASKS.md)
 │   │   ├── normal_operation/
