@@ -1,11 +1,14 @@
 """Audio loading, normalization, and segmentation for the acoustic classifier."""
 
 import argparse
+import logging
 from pathlib import Path
 
 import librosa
 import numpy as np
 import soundfile as sf
+
+_log = logging.getLogger(__name__)
 
 from src.config import DURATION, SAMPLE_RATE
 
@@ -102,6 +105,15 @@ def process_directory(
             continue
         dest_class_dir = out_dir / class_dir.name
         dest_class_dir.mkdir(parents=True, exist_ok=True)
+        all_files = [f for f in class_dir.iterdir() if f.is_file()]
+        skipped = [f for f in all_files if f.suffix.lower() != ".wav"]
+        if skipped:
+            _log.warning(
+                "%s: %d non-WAV file(s) skipped: %s",
+                class_dir.name,
+                len(skipped),
+                sorted({f.suffix for f in skipped}),
+            )
         for wav_path in sorted(class_dir.glob("*.wav")):
             audio = load_audio(wav_path, sr=sr)
             audio = normalize(audio)

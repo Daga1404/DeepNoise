@@ -65,6 +65,7 @@ def test_augment_audio_returns_at_least_two_arrays():
 
 
 def test_augment_audio_arrays_are_distinct():
+    np.random.seed(42)
     audio = np.random.randn(TARGET).astype(np.float32)
     results = augment_audio(audio)
     for i in range(len(results)):
@@ -81,6 +82,7 @@ def test_augment_audio_preserves_length():
 
 
 def test_augment_audio_gaussian_noise_differs_from_original():
+    np.random.seed(42)
     audio = np.random.randn(TARGET).astype(np.float32)
     noisy = augment_audio(audio)[0]
     assert not np.allclose(noisy, audio)

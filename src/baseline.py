@@ -93,9 +93,9 @@ def evaluate(
 
     preds = model.predict(X_test)
     accuracy = float(accuracy_score(y_test, preds))
-    macro_f1 = float(f1_score(y_test, preds, average="macro"))
+    macro_f1 = float(f1_score(y_test, preds, average="macro", zero_division=0))
     class_names = [CLASS_LABELS[i] for i in range(NUM_CLASSES)]
-    report = classification_report(y_test, preds, target_names=class_names)
+    report = classification_report(y_test, preds, target_names=class_names, zero_division=0)
 
     _save_confusion_matrix(y_test, preds, class_names, output_dir / "baseline_confusion.png")
 

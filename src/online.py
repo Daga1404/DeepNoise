@@ -10,13 +10,16 @@ Usage:
 
 import argparse
 import datetime
+import logging
 from pathlib import Path
 
 import numpy as np
 
-from src.config import CLASS_LABELS, DURATION, SAMPLE_RATE
+from src.config import CLASS_LABELS, DURATION, INPUT_SHAPE, SAMPLE_RATE
 from src.features import compute_melspectrogram
 from src.preprocess import load_audio, normalize, segment
+
+_log = logging.getLogger(__name__)
 
 
 def _preprocess(audio: np.ndarray) -> np.ndarray:
@@ -31,11 +34,16 @@ def _preprocess(audio: np.ndarray) -> np.ndarray:
         audio: Raw mono float32 array of any length.
 
     Returns:
-        4-D numpy array of shape ``(1, n_mels, T, 1)``.
+        4-D numpy array of shape ``(1, n_mels, T, 1)`` with values in ``[-1, 1]``.
     """
     audio = normalize(audio)
     audio = segment(audio, sr=SAMPLE_RATE, duration=DURATION)
     log_S = compute_melspectrogram(audio)
+    # Mirror dataset._load_and_normalize: scale each spectrogram to [-1, 1] per sample
+    # so inference sees the same distribution the CNN was trained on (CRIT-01).
+    s_min, s_max = log_S.min(), log_S.max()
+    if s_max > s_min:
+        log_S = 2.0 * (log_S - s_min) / (s_max - s_min) - 1.0
     return log_S[np.newaxis, ..., np.newaxis].astype(np.float32)
 
 
@@ -97,23 +105,34 @@ def run_mic_mode(model_path: Path) -> None:
     from tensorflow import keras
 
     model = keras.models.load_model(model_path)
-    n_samples = int(SAMPLE_RATE * DURATION)
+    # First predict triggers XLA/JIT graph compilation; warm up now so the
+    # demo loop does not appear to hang on the first real recording (MIN-01).
+    model.predict(np.zeros((1, *INPUT_SHAPE), dtype="float32"), verbose=0)
 
+    n_samples = int(SAMPLE_RATE * DURATION)
     print("Listening… (Ctrl+C to stop)")
     try:
         while True:
-            recording = sd.rec(
-                n_samples,
-                samplerate=SAMPLE_RATE,
-                channels=1,
-                dtype="float32",
-            )
-            sd.wait()
+            try:
+                recording = sd.rec(
+                    n_samples,
+                    samplerate=SAMPLE_RATE,
+                    channels=1,
+                    dtype="float32",
+                )
+                sd.wait()
+            except sd.PortAudioError as exc:
+                _log.error(
+                    "Audio device error: %s. Use --file mode for demo without a mic.", exc
+                )
+                return
             audio = recording.flatten()
             class_name, confidence = classify_audio(model, audio)
             print(_format_result(class_name, confidence))
     except KeyboardInterrupt:
         print("\nStopped.")
+    finally:
+        sd.stop()  # release device on KeyboardInterrupt or PortAudioError return
 
 
 def main() -> None:

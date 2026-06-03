@@ -5,9 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="280f4144-08f5-4ffc-a5a1-afad086f1131" name="Changes" comment="initial commit / remote definition">
-      <change afterPath="$PROJECT_DIR$/agents/approver.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/baseline.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/baseline.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/evaluate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/online.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/online.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,6 +52,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "test",
+    "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -77,6 +80,7 @@
       <updated>1779326148758</updated>
       <workItem from="1779326149879" duration="2298000" />
       <workItem from="1780431452412" duration="5448000" />
+      <workItem from="1780517248452" duration="819000" />
     </task>
     <task id="LOCAL-00001" summary="initial commit / remote definition">
       <option name="closed" value="true" />

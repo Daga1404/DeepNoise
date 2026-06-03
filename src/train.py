@@ -29,15 +29,25 @@ def _str_to_bool(value: str) -> bool:
     raise argparse.ArgumentTypeError(f"Expected true/false, got '{value}'")
 
 
+def _positive_int(value: str) -> int:
+    """Argparse type that rejects zero and negative integers (MAJ-03)."""
+    n = int(value)
+    if n <= 0:
+        raise argparse.ArgumentTypeError(f"Must be a positive integer, got {value}")
+    return n
+
+
 def _compute_class_weights(train_df) -> dict[int, float]:
-    """Return a {class_id: weight} dict balanced for the training split."""
+    """Return a {class_id: weight} dict balanced for the training split.
+
+    Classes absent from the training split receive weight 1.0 rather than
+    crashing compute_class_weight with a ValueError (MAJ-01).
+    """
     y = train_df["class_id"].values
-    weights = compute_class_weight(
-        class_weight="balanced",
-        classes=np.arange(NUM_CLASSES),
-        y=y,
-    )
-    return {int(i): float(w) for i, w in enumerate(weights)}
+    present = np.unique(y)
+    weights = compute_class_weight("balanced", classes=present, y=y)
+    weight_dict = {int(c): float(w) for c, w in zip(present, weights)}
+    return {i: weight_dict.get(i, 1.0) for i in range(NUM_CLASSES)}
 
 
 def _save_history(history, output_dir: Path) -> None:
@@ -167,13 +177,13 @@ def main() -> None:
     )
     parser.add_argument(
         "--epochs",
-        type=int,
+        type=_positive_int,
         default=50,
         help="Maximum number of training epochs (default: 50).",
     )
     parser.add_argument(
         "--batch-size",
-        type=int,
+        type=_positive_int,
         default=32,
         help="Mini-batch size (default: 32).",
     )

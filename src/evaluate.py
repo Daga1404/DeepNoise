@@ -78,9 +78,9 @@ def evaluate_cnn(model_path: Path, data_dir: Path, output_dir: Path) -> dict:
     probs = np.array(probs_list, dtype=np.float32)
 
     accuracy = float(accuracy_score(y_true, y_pred))
-    macro_f1 = float(f1_score(y_true, y_pred, average="macro"))
+    macro_f1 = float(f1_score(y_true, y_pred, average="macro", zero_division=0))
     class_names = [CLASS_LABELS[i] for i in range(NUM_CLASSES)]
-    report = classification_report(y_true, y_pred, target_names=class_names)
+    report = classification_report(y_true, y_pred, target_names=class_names, zero_division=0)
 
     # Macro F1 first — it is the primary metric.
     _log.info(f"Macro F1 : {macro_f1:.4f}")
